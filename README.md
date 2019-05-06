@@ -1,47 +1,36 @@
-Damn Small SQLi Scanner [![Python 2.6|2.7](https://img.shields.io/badge/python-2.6|2.7-yellow.svg)](https://www.python.org/) [![License](https://img.shields.io/badge/license-Public_domain-red.svg)](https://wiki.creativecommons.org/wiki/Public_domain)
-=========
 
-**Damn Small SQLi Scanner** (DSSS) is a fully functional [SQL injection](https://en.wikipedia.org/wiki/SQL_injection) vulnerability scanner (supporting GET and POST parameters) written in under 100 lines of code.
+# 整体流程:
 
-![Vulnerable](http://i.imgur.com/7mXeXjF.png)
+![](https://i.loli.net/2019/05/06/5cd054aa1e705.png)
 
-As of optional settings it supports HTTP proxy together with HTTP header values `User-Agent`, `Referer` and `Cookie`.
+---
 
-Sample runs
-----
+## 提取内容函数：
 
-```
-$ python dsss.py -h
-Damn Small SQLi Scanner (DSSS) < 100 LoC (Lines of Code) #v0.2o
- by: Miroslav Stampar (@stamparm)
+![](https://i.loli.net/2019/05/06/5cd0550f672ff.png)
 
-Usage: dsss.py [options]
+亮点:
 
-Options:
-  --version          show program's version number and exit
-  -h, --help         show this help message and exit
-  -u URL, --url=URL  Target URL (e.g. "http://www.target.com/page.php?id=1")
-  --data=DATA        POST data (e.g. "query=test")
-  --cookie=COOKIE    HTTP Cookie header value
-  --user-agent=UA    HTTP User-Agent header value
-  --referer=REFERER  HTTP Referer header value
-  --proxy=PROXY      HTTP proxy address (e.g. "http://127.0.0.1:8080")
-```
+- TEXT文本的处理
 
-```
-$ python dsss.py -u "http://testphp.vulnweb.com/artists.php?artist=1"
-Damn Small SQLi Scanner (DSSS) < 100 LoC (Lines of Code) #v0.2o
- by: Miroslav Stampar (@stamparm)
+---
 
-* scanning GET parameter 'artist'
- (i) GET parameter 'artist' could be error SQLi vulnerable (MySQL)
- (i) GET parameter 'artist' appears to be blind SQLi vulnerable (e.g.: 'http://t
-estphp.vulnweb.com/artists.php?artist=1%20AND%2061%3E60')
+## 基于报错的测试:
 
-scan results: possible vulnerabilities found
-```
+![](https://i.loli.net/2019/05/06/5cd0557531ada.png)
 
-Requirements
-----
+---
 
-[Python](http://www.python.org/download/) version **2.6.x** or **2.7.x** is required for running this program.
+## 基于布尔的测试:
+
+![](https://i.loli.net/2019/05/06/5cd05595e835e.png)
+
+在页面文本相似度那里,对于0.95那个理解有点费劲,提了个[issue](https://github.com/stamparm/DSSS/issues/8)问作者.
+
+作者很nice,也很快就回复我了。我才get到它这里面的判断有2种:精确判断和模糊判断.
+
+精确判断：可以通过`HTTP-CODE`和`TITLE`来判断两个页面是否是100%一样
+
+模糊判断: 通过`quick_ratio`来计算两个页面的文本相似度,因为`quick_ratio`计算有时不太准确,有一定的误差,故`FUZZY_THRESHOLD = 0.95`设置如此,留了5%做误差.
+
+
